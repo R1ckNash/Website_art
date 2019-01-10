@@ -6,7 +6,7 @@
     <#list articles as article>
         <div class="card my-3">
         <div class="m-2">
-            <span>${article.text}</span>
+            <span>${article.title?ifExists}</span>
         </div>
         <div class="card-footer text-muted">
             Автор статьи : ${article.authorName}
@@ -14,10 +14,10 @@
         <form class="form-inline" method="post" action="/showArticle">
             <input type="hidden" value="${article.id}" name="id" />
             <input type="hidden" value="${_csrf.token}" name="_csrf" />
-            <button type="submit">Просмотреть</button>
+            <button type="submit" class="btn btn-primary btn-lg btn-block">Просмотреть</button>
         </form>
-
         </div>
+
     <#else>
         Пока что список пуст
     </#list>

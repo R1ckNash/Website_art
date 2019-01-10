@@ -32,6 +32,9 @@ public class MainController {
     @Autowired
     private UserRepo userRepo;
 
+    @Value("${upload.path}")
+    private String uploadPath;
+
     @GetMapping("/")
     public String greeting(Map<String, Object> model) {
         return "greeting";
@@ -43,26 +46,4 @@ public class MainController {
         model.put("articles", articles);
         return "main";
     }
-
-
-    @PostMapping("/main")
-    public String add(
-            @AuthenticationPrincipal User user,
-            @RequestParam String text,
-            @RequestParam String tag, Map<String, Object> model
-    ) throws IOException {
-        Message message = new Message(text, tag, user);
-
-
-        messageRepo.save(message);
-
-        Iterable<Message> messages = messageRepo.findAll();
-
-        model.put("messages", messages);
-
-        return "main";
-    }
-
-
-
 }

@@ -7,14 +7,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
 
@@ -39,65 +40,85 @@ public class ArticleController {
             }
         }
 
-
-        model.put("title", cur_article.getTitle());
+        if(cur_article.getTitle() != null){
+            model.put("title", cur_article.getTitle());
+        }
         model.put("author", cur_article.getAuthorName());
-        model.put("text", cur_article.getText());
-        model.put("file", cur_article.getFilename());
-        return "one";
-    }
+        if(cur_article.getDate() != null){
+            model.put("date", cur_article.getDate().toString());
+        }
+        if(cur_article.getFilename() != null){
+            model.put("file", cur_article.getFilename());
+        }
 
-    @GetMapping("/article")
-    public String article(Map<String, Object> model) {
-        return "article";
+        return "one";
     }
 
     @PostMapping("/article")
     public String add(
             @AuthenticationPrincipal User user,
             @RequestParam String title,
-            @RequestParam String text,
-            @RequestParam("file") MultipartFile file,
-            @RequestParam String tag, Map<String, Object> model
+            @RequestParam Long date,
+            @RequestParam String tag,
+            @RequestParam ("file") MultipartFile file
     ) throws IOException {
 
-
-        if(text.isEmpty() || title.isEmpty()){
-            Iterable<Article> articles = articleRepo.findAll();
-
-            model.put("articles", articles);
-
+        if(title.isEmpty()){
             return "article";
         }
 
-        Article article = new Article(text, title, user);
-
-        if (file != null && !file.getOriginalFilename().isEmpty()) {
-            File uploadDir = new File(uploadPath);
-
-            if (!uploadDir.exists()) {
-                uploadDir.mkdir();
-            }
-
-            String uuidFile = UUID.randomUUID().toString();
-            String resultFilename = uuidFile + "." + file.getOriginalFilename();
-
-            file.transferTo(new File(uploadPath + "/" + resultFilename));
-
-            article.setFilename(resultFilename);
-        }
+        Article article = new Article(title, user, date);
 
         String [] words = tag.split("[,:;.!?\\s]+");
         for (String word : words){
             article.setKeyWords(word);
         }
 
+        if(file != null && !file.getOriginalFilename().isEmpty()){
+            File uploadDir = new File(uploadPath);
+
+            if(!uploadDir.exists()){
+                uploadDir.mkdir();
+            }
+
+            String uuidFile = UUID.randomUUID().toString();
+            String resultFilename = uuidFile + "." + file.getOriginalFilename();
+            file.transferTo(new File(uploadPath + "/" + resultFilename));
+            article.setFilename(resultFilename);
+        }
         articleRepo.save(article);
 
-        Iterable<Article> articles = articleRepo.findAll();
-
-        model.put("articles", articles);
-
         return "article";
+    }
+
+    @GetMapping("/article")
+    public String article(){
+        return "article";
+    }
+
+    @GetMapping("/allArticle")
+    public String allArticle(@AuthenticationPrincipal User user,
+                             Map<String, Object> model){
+        Iterable<Article> articles = articleRepo.findAll();
+        ArrayList<Article> myArticles = new ArrayList<>();
+
+        for(Article article : articles){
+            if(article.getAuthorName().equalsIgnoreCase(user.getUsername())){
+                myArticles.add(article);
+            }
+        }
+
+        if(!myArticles.isEmpty()) {
+            model.put("articles", myArticles);
+        }else{
+            model.put("message", "У вас нет ни одной опубликованной статьи");
+        }
+        return "allArticle";
+    }
+
+    @PostMapping("/allArticle")
+    public String delete(@RequestParam Long id){
+        articleRepo.deleteById(id);
+        return "redirect:/allArticle";
     }
 }
