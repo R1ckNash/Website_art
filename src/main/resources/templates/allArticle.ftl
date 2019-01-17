@@ -19,25 +19,32 @@
 
             </div>
 
-        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
-        <div class="btn-group mr-2" role="group" aria-label="First group">
+            <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
 
+            <div class="btn-group mr-2" role="group" aria-label="First group">
             <form class="form-inline" method="post" action="/showArticle">
-                <input type="hidden" value="${article.id}" name="id" />
-                <input type="hidden" value="${_csrf.token}" name="_csrf" />
-                <button type="submit" class="btn btn-primary">Просмотреть</button>
+            <input type="hidden" value="${article.id}" name="id" />
+        <input type="hidden" value="${_csrf.token}" name="_csrf" />
+        <button type="submit" class="btn btn-primary">Просмотреть</button>
             </form>
+            </div>
 
-        </div>
-
-        <div class="btn-group mr-2" role="group" aria-label="Second group">
-
+            <div class="btn-group mr-2" role="group" aria-label="Second group">
             <form class="form-inline" method="post" action="/allArticle">
-                <input type="hidden" value="${article.id}" name="id" />
-                <input type="hidden" value="${_csrf.token}" name="_csrf" />
-                <button type="submit" class="btn btn-#ff6ab2">Удалить</button>
+                    <input type="hidden" value="${article.id}" name="id" />
+                    <input type="hidden" value="${_csrf.token}" name="_csrf" />
+                    <button type="submit" class="btn btn-primary">Удалить</button>
             </form>
-        </div>
+
+            </div>
+
+            <div class="btn-group mr-2" role="group" aria-label="Third group">
+                <form class="form-inline" method="post" action="/editArticle">
+                    <input type="hidden" value="${article.id}" name="id" />
+                    <input type="hidden" value="${_csrf.token}" name="_csrf" />
+                    <button type="submit" class="btn btn-primary">Изменить</button>
+                </form>
+            </div>
 
             </div>
         </#list>
